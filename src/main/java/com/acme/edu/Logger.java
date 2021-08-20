@@ -1,5 +1,7 @@
 package com.acme.edu;
 
+import java.util.Objects;
+
 import static java.lang.Math.abs;
 
 public class Logger {
@@ -13,8 +15,12 @@ public class Logger {
     private static int intMaxMinValueCounter;
     private static boolean lastLogIntegerFlag;
 
+    private static String strBuffer;
+    private static int strCounter;
+    private static boolean lastLogStringFlag;
+
     public static void log(int message) {
-        //save(formatMessage(PRIMITIVE_PREFIX, message));
+        processStrBuffer();
         checkIntOverFlow(message);
         lastLogIntegerFlag = true;
     }
@@ -52,66 +58,104 @@ public class Logger {
             --intMaxMinValueCounter;
         }
     }
-    public static void log(byte message) {
-        processIntBuffer();
-        save(formatMessage(PRIMITIVE_PREFIX, message));
-    }
-
-    public static void log(char message) {
-        processIntBuffer();
-        save(formatMessage(CHAR_PREFIX, message));
-    }
-    public static void log(boolean message) {
-        processIntBuffer();
-        save(formatMessage(PRIMITIVE_PREFIX, message));
-    }
-
-    public static void log(String message) {
-        processIntBuffer();
-        save(formatMessage(STRING_PREFIX, message));
-    }
-
-    public static void log(Object message) {
-        processIntBuffer();
-        save(formatMessage(OBJECT_PREFIX, message));
-    }
-
-    private static String formatMessage(String prefix, Object message) {
-        return prefix + message;
-    }
-
-    private static void save(String message) {
-        print(message);
-    }
-    private static void print(String message) {
-        System.out.println(message);
-    }
-
     private static void processIntBuffer() {
-        if (lastLogIntegerFlag){
+        if (lastLogIntegerFlag) {
             int overflowValue = intMaxMinValueCounter > 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
             for (int i = 0; i < abs(intMaxMinValueCounter); i++) {
-              save(formatMessage(PRIMITIVE_PREFIX, overflowValue));
+                write(formatMessage(PRIMITIVE_PREFIX, overflowValue));
             }
-            if (intBuffer != 0 || intMaxMinValueCounter == 0) {// to avoid printing MAX_VALUE 0 or MIN_VALUE 0
-                save(formatMessage(PRIMITIVE_PREFIX, intBuffer));
+            // to avoid printing "MAX_VALUE\n0" or "MIN_VALUE\n0"
+            // but allow "0" (when "MAX_VALUE" or "MIN_VALUE" is not needed)
+            if (intBuffer != 0 || intMaxMinValueCounter == 0) {
+                write(formatMessage(PRIMITIVE_PREFIX, intBuffer));
             }
             cleanIntBuffer();
         }
     }
-
     private static void cleanIntBuffer() {
         intBuffer = 0;
         intMaxMinValueCounter = 0;
         lastLogIntegerFlag = false;
     }
 
-//    private static boolean checkIntBuffer() {
-//        return lastLogIntegerFlag;
+    //--------------------------------------------
+    public static void log(String message) {
+        processIntBuffer();
+
+        if (!lastLogStringFlag) {
+            initiateStrBuffer(message);
+        } else {
+            checkRepeatedString(message);
+        }
+    }
+
+    private static void initiateStrBuffer(String message) {
+        strBuffer = message;
+        ++strCounter;
+        lastLogStringFlag = true;
+    }
+
+    private static void checkRepeatedString(String message) {
+        if (Objects.equals(strBuffer, message)) {
+            ++strCounter;
+        } else {
+            processStrBuffer();
+            initiateStrBuffer(message);
+        }
+    }
+    private static void processStrBuffer() {
+        if (lastLogStringFlag) {
+            write(formatMessage(STRING_PREFIX, formatString(strBuffer, strCounter)));
+            cleanStrBuffer();
+        }
+    }
+
+    private static String formatString(String strBuffer, int strCounter) {
+        if (strCounter == 1) return strBuffer;
+        return strBuffer + " (x" + strCounter + ")";
+    }
+
+    private static void cleanStrBuffer() {
+        strBuffer = null;
+        strCounter = 0;
+        lastLogStringFlag = false;
+    }
+
+    //--------------------------------------------
+    public static void log(Object message) {
+        flush();
+        write(formatMessage(OBJECT_PREFIX, message));
+    }
+
+    private static String formatMessage(String prefix, Object message) {
+        return prefix + message;
+    }
+
+    public static void log(byte message) {
+        flush();
+        write(formatMessage(PRIMITIVE_PREFIX, message));
+    }
+
+    public static void log(char message) {
+        flush();
+        write(formatMessage(CHAR_PREFIX, message));
+    }
+    public static void log(boolean message) {
+        flush();
+        write(formatMessage(PRIMITIVE_PREFIX, message));
+    }
+
+//    private static void save(String message) {
+//        print(message);
 //    }
+    private static void write(String message) {
+        System.out.println(message);
+    }
+
 
     public static void flush() {
-        processIntBuffer();
+            processIntBuffer();
+            processStrBuffer();
     }
 }
 

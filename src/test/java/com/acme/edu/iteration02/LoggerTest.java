@@ -4,6 +4,7 @@ import com.acme.edu.Logger;
 import com.acme.edu.SysoutCaptureAndAssertionAbility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -61,7 +62,7 @@ public class LoggerTest implements SysoutCaptureAndAssertionAbility {
         Logger.log(Integer.MIN_VALUE);
         Logger.log(Integer.MAX_VALUE-1);
         Logger.log(Integer.MAX_VALUE);
-        Logger.log(3);
+        Logger.log(5);
         Logger.log(Integer.MAX_VALUE);
 
         Logger.log((byte)5);
@@ -73,7 +74,6 @@ public class LoggerTest implements SysoutCaptureAndAssertionAbility {
         Logger.log(-8);
 
         Logger.log('c');
-
         Logger.flush();
         //endregion
 
@@ -85,7 +85,7 @@ public class LoggerTest implements SysoutCaptureAndAssertionAbility {
         assertSysoutContains("str 2");
 
         assertSysoutContains(Integer.toString(Integer.MAX_VALUE));
-        assertSysoutContains("2");
+        assertSysoutContains("3");
 
         assertSysoutContains("5");
         assertSysoutContains("a");
@@ -95,8 +95,8 @@ public class LoggerTest implements SysoutCaptureAndAssertionAbility {
         assertSysoutContains("c");
         //endregion
     }
-/*
-    @Disable
+
+    @Disabled
     @Test
     public void shouldLogCorrectlyByteOverflowWhenSequentBytes() {
         //region when
@@ -129,18 +129,16 @@ public class LoggerTest implements SysoutCaptureAndAssertionAbility {
         Logger.log("str 3");
         Logger.log("str 3");
         Logger.log("str 3");
+        Logger.flush();
         //endregion
 
         //region then
-        assertSysoutContains(
-            "str 1\n" +
-            "str 2 (x2)\n" +
-            "0\n" +
-            "str 2\n" +
-            "str 3 (x3)\n"
-        );
+        assertSysoutContains("str 1");
+        assertSysoutContains("str 2 (x2)");
+        assertSysoutContains("0");
+        assertSysoutContains("str 2");
+        assertSysoutContains("str 3 (x3)");
         //endregion
     }
 
-    */
 }
