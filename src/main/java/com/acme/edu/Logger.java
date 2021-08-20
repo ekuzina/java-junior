@@ -1,5 +1,7 @@
 package com.acme.edu;
 
+import static java.lang.Math.abs;
+
 public class Logger {
 
     public static final String PRIMITIVE_PREFIX = "primitive: ";
@@ -31,7 +33,7 @@ public class Logger {
             intBuffer += message;
         } else { // only if intBuffer > 0
             intBuffer = (int)(message-diff);
-            if (intMaxMinValueCounter > 0) {
+            if (intMaxMinValueCounter < 0) {
                 --intBuffer;
             }
             ++intMaxMinValueCounter;
@@ -40,11 +42,11 @@ public class Logger {
 
     private static void checkMinIntOverFlow(int message) {
         long diff = (long)intBuffer-Integer.MIN_VALUE;
-        if ( diff > Math.abs(message)) {
+        if ( diff > abs(message)) {
             intBuffer += message;
         } else { // only if intBuffer < 0
             intBuffer = (int)(message+diff);
-            if (intMaxMinValueCounter < 0) {
+            if (intMaxMinValueCounter > 0) {
                 --intBuffer;
             }
             --intMaxMinValueCounter;
@@ -86,24 +88,27 @@ public class Logger {
     }
 
     private static void processIntBuffer() {
-        if (checkIntBuffer()){
+        if (lastLogIntegerFlag){
             int overflowValue = intMaxMinValueCounter > 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
-            for (int i=0; i < Math.abs(intMaxMinValueCounter); i++) {
+            for (int i = 0; i < abs(intMaxMinValueCounter); i++) {
               save(formatMessage(PRIMITIVE_PREFIX, overflowValue));
             }
-            save(formatMessage(PRIMITIVE_PREFIX, intBuffer));
+            if (intBuffer != 0 || intMaxMinValueCounter == 0) {// to avoid printing MAX_VALUE 0 or MIN_VALUE 0
+                save(formatMessage(PRIMITIVE_PREFIX, intBuffer));
+            }
             cleanIntBuffer();
         }
     }
 
     private static void cleanIntBuffer() {
         intBuffer = 0;
+        intMaxMinValueCounter = 0;
         lastLogIntegerFlag = false;
     }
 
-    private static boolean checkIntBuffer() {
-        return lastLogIntegerFlag;
-    }
+//    private static boolean checkIntBuffer() {
+//        return lastLogIntegerFlag;
+//    }
 
     public static void flush() {
         processIntBuffer();

@@ -50,23 +50,49 @@ public class LoggerTest implements SysoutCaptureAndAssertionAbility {
     @Test
     public void shouldLogCorrectlyIntegerOverflowWhenSequentIntegers() {
         //region when
-//        Logger.log("str 1");
-//        Logger.log(10);
-//        Logger.log(Integer.MAX_VALUE);
-//        Logger.log("str 2");
-//        Logger.log(0);
+        Logger.log("str 1");
+
+        Logger.log(0);
         Logger.log(Integer.MIN_VALUE);
         Logger.log(Integer.MAX_VALUE);
+
+        Logger.log("str 2");
+
+        Logger.log(Integer.MIN_VALUE);
+        Logger.log(Integer.MAX_VALUE-1);
+        Logger.log(Integer.MAX_VALUE);
+        Logger.log(3);
+        Logger.log(Integer.MAX_VALUE);
+
+        Logger.log((byte)5);
+        Logger.log('a');
+        Logger.log(6);
+        Logger.log('b');
+
+        Logger.log(Integer.MIN_VALUE+8);
+        Logger.log(-8);
+
+        Logger.log('c');
+
         Logger.flush();
         //endregion
 
         //region then
-//        assertSysoutContains("str 1");
-//        assertSysoutContains("10");
-//        assertSysoutContains(Integer.toString(Integer.MAX_VALUE));
-//        assertSysoutContains("str 2");
-//        assertSysoutContains("0");
+        assertSysoutContains("str 1");
+
         assertSysoutContains("-1");
+
+        assertSysoutContains("str 2");
+
+        assertSysoutContains(Integer.toString(Integer.MAX_VALUE));
+        assertSysoutContains("2");
+
+        assertSysoutContains("5");
+        assertSysoutContains("a");
+        assertSysoutContains("6");
+        assertSysoutContains("b");
+        assertSysoutContains(Integer.toString(Integer.MIN_VALUE));
+        assertSysoutContains("c");
         //endregion
     }
 /*
