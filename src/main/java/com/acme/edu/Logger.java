@@ -4,13 +4,14 @@ import java.util.Objects;
 import static com.acme.edu.Logger.Classes.*;
 import static java.lang.Math.abs;
 
-public class Logger {
+public class Logger{
     public static final String PRIMITIVE_PREFIX = "primitive: ";
     public static final String CHAR_PREFIX = "char: ";
     public static final String STRING_PREFIX = "string: ";
     public static final String OBJECT_PREFIX = "reference: ";
 
-    enum Classes{UNDEFINED,
+    enum Classes{
+        UNDEFINED,
         BOOLEAN, CHAR, BYTE, INTEGER,
         STRING, OBJECT
     }
@@ -34,13 +35,13 @@ public class Logger {
 
     private static  void processIntOverflow(int message) {
         if (message > 0) {
-            processMaxIntOverflow(message);
+            processIntMaxOverflow(message);
         } else {
-            processMinIntOverflow(message);
+            processIntMinOverflow(message);
         }
     }
 
-    private static void processMaxIntOverflow(int message /*>=0*/) {
+    private static void processIntMaxOverflow(int message /*>=0*/) {
         long diff = Integer.MAX_VALUE-(long)intBuffer;
         if ( diff > message) {
             intBuffer += message;
@@ -53,7 +54,7 @@ public class Logger {
         }
     }
 
-    private static void processMinIntOverflow(int message) {
+    private static void processIntMinOverflow(int message) {
         long diff = (long)intBuffer-Integer.MIN_VALUE;
         if ( diff > abs(message)) {
             intBuffer += message;
@@ -148,13 +149,13 @@ public class Logger {
 
     private static  void processByteOverflow(byte message) {
         if (message > 0) {
-            processMaxByteOverflow(message);
+            processByteMaxOverflow(message);
         } else {
-            processMinByteOverflow(message);
+            processByteMinOverflow(message);
         }
     }
 
-    private static void processMaxByteOverflow(Byte message /*>=0*/) {
+    private static void processByteMaxOverflow(Byte message /*>=0*/) {
         int diff = Byte.MAX_VALUE-byteBuffer;
         if ( diff > message) {
             byteBuffer += message;
@@ -167,7 +168,7 @@ public class Logger {
         }
     }
 
-    private static void processMinByteOverflow(byte message) {
+    private static void processByteMinOverflow(byte message) {
         int diff = byteBuffer-Byte.MIN_VALUE;
         if ( diff > abs(message)) {
             byteBuffer += message;
