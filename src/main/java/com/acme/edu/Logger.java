@@ -18,13 +18,13 @@ public class Logger {
     private static Classes lastLogClass = UNDEFINED;
 
     private static int intBuffer;
-    private static int intMaxMinValueCounter;
+    private static long intOverflowCounter;
 
     private static String strBuffer;
     private static int strCounter;
 
-    private static int byteBuffer;
-    private static int byteMaxMinValueCounter;
+    private static byte byteBuffer;
+    private static long byteOverflowCounter;
 
     public static void log(int message) {
         flushOtherClass(INTEGER);
@@ -46,10 +46,10 @@ public class Logger {
             intBuffer += message;
         } else { // only if intBuffer > 0
             intBuffer = (int)(message-diff);
-            if (intMaxMinValueCounter < 0) {
+            if (intOverflowCounter < 0) {
                 --intBuffer;
             }
-            ++intMaxMinValueCounter;
+            ++intOverflowCounter;
         }
     }
 
@@ -59,10 +59,10 @@ public class Logger {
             intBuffer += message;
         } else { // only if intBuffer < 0
             intBuffer = (int)(message+diff);
-            if (intMaxMinValueCounter > 0) {
+            if (intOverflowCounter > 0) {
                 --intBuffer;
             }
-            --intMaxMinValueCounter;
+            --intOverflowCounter;
         }
     }
 
@@ -72,13 +72,13 @@ public class Logger {
     }
 
     private  static void writeInteger() {
-        writeIntMinMaxValue();
+        writeIntOverflowValue();
         writeIntResidual();
     }
 
-    private static void writeIntMinMaxValue() {
-        int overflowValue = intMaxMinValueCounter > 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
-        for (int i = 0; i < abs(intMaxMinValueCounter); i++) {
+    private static void writeIntOverflowValue() {
+        int overflowValue = intOverflowCounter > 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+        for (int i = 0; i < abs(intOverflowCounter); i++) {
             write(formatMessage(PRIMITIVE_PREFIX, overflowValue));
         }
     }
@@ -86,14 +86,14 @@ public class Logger {
     private static void writeIntResidual() {
         // to avoid printing "MAX_VALUE\n0" or "MIN_VALUE\n0"
         // but allow "0" (when "MAX_VALUE" or "MIN_VALUE" is not needed)
-        if (intBuffer != 0 || intMaxMinValueCounter == 0) {
+        if (intBuffer != 0 || intOverflowCounter == 0) {
             write(formatMessage(PRIMITIVE_PREFIX, intBuffer));
         }
     }
 
     private static void cleanIntBuffer() {
         intBuffer = 0;
-        intMaxMinValueCounter = 0;
+        intOverflowCounter = 0;
     }
 
     //--------------------------------------------
@@ -159,11 +159,11 @@ public class Logger {
         if ( diff > message) {
             byteBuffer += message;
         } else { // only if byteBuffer > 0
-            byteBuffer = (int)(message-diff);
-            if (byteMaxMinValueCounter < 0) {
+            byteBuffer = (byte)(message-diff);
+            if (byteOverflowCounter < 0) {
                 --byteBuffer;
             }
-            ++byteMaxMinValueCounter;
+            ++byteOverflowCounter;
         }
     }
 
@@ -172,11 +172,11 @@ public class Logger {
         if ( diff > abs(message)) {
             byteBuffer += message;
         } else { // only if byteBuffer < 0
-            byteBuffer = (int)(message+diff);
-            if (byteMaxMinValueCounter > 0) {
+            byteBuffer = (byte)(message+diff);
+            if (byteOverflowCounter > 0) {
                 --byteBuffer;
             }
-            --byteMaxMinValueCounter;
+            --byteOverflowCounter;
         }
     }
 
@@ -186,13 +186,13 @@ public class Logger {
     }
 
     private  static void writeByte() {
-        writeByteMinMaxValue();
+        writeByteOverflowValue();
         writeByteResidual();
     }
 
-    private static void writeByteMinMaxValue() {
-        byte overflowValue = byteMaxMinValueCounter > 0 ? Byte.MAX_VALUE : Byte.MIN_VALUE;
-        for (int i = 0; i < abs(byteMaxMinValueCounter); i++) {
+    private static void writeByteOverflowValue() {
+        byte overflowValue = byteOverflowCounter > 0 ? Byte.MAX_VALUE : Byte.MIN_VALUE;
+        for (int i = 0; i < abs(byteOverflowCounter); i++) {
             write(formatMessage(PRIMITIVE_PREFIX, overflowValue));
         }
     }
@@ -200,14 +200,14 @@ public class Logger {
     private static void writeByteResidual() {
         // to avoid printing "MAX_VALUE\n0" or "MIN_VALUE\n0"
         // but allow "0" (when "MAX_VALUE" or "MIN_VALUE" is not needed)
-        if (byteBuffer != 0 || byteMaxMinValueCounter == 0) {
+        if (byteBuffer != 0 || byteOverflowCounter == 0) {
             write(formatMessage(PRIMITIVE_PREFIX, byteBuffer));
         }
     }
 
     private static void cleanByteBuffer() {
         byteBuffer = 0;
-        byteMaxMinValueCounter = 0;
+        byteOverflowCounter = 0;
     }
 
     //--------------------------------------------
@@ -222,6 +222,7 @@ public class Logger {
         write(formatMessage(CHAR_PREFIX, message));
         setLastLogClass(CHAR);
     }
+
     public static void log(boolean message) {
         flushOtherClass(BOOLEAN);
         write(formatMessage(PRIMITIVE_PREFIX, message));
