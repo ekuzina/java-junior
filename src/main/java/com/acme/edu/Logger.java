@@ -1,7 +1,6 @@
 package com.acme.edu;
 
 import java.util.Objects;
-
 import static com.acme.edu.Logger.Classes.*;
 import static java.lang.Math.abs;
 
@@ -23,6 +22,9 @@ public class Logger {
 
     private static String strBuffer;
     private static int strCounter;
+
+    private static int byteBuffer;
+    private static int byteMaxMinValueCounter;
 
     public static void log(int message) {
         flushOtherClass(INTEGER);
@@ -138,16 +140,81 @@ public class Logger {
     }
 
     //--------------------------------------------
+    public static void log(byte message) {
+        flushOtherClass(BYTE);
+        processByteOverflow(message);
+        setLastLogClass(BYTE);
+    }
+
+    private static  void processByteOverflow(byte message) {
+        if (message > 0) {
+            processMaxByteOverflow(message);
+        } else {
+            processMinByteOverflow(message);
+        }
+    }
+
+    private static void processMaxByteOverflow(Byte message /*>=0*/) {
+        int diff = Byte.MAX_VALUE-byteBuffer;
+        if ( diff > message) {
+            byteBuffer += message;
+        } else { // only if byteBuffer > 0
+            byteBuffer = (int)(message-diff);
+            if (byteMaxMinValueCounter < 0) {
+                --byteBuffer;
+            }
+            ++byteMaxMinValueCounter;
+        }
+    }
+
+    private static void processMinByteOverflow(byte message) {
+        int diff = byteBuffer-Byte.MIN_VALUE;
+        if ( diff > abs(message)) {
+            byteBuffer += message;
+        } else { // only if byteBuffer < 0
+            byteBuffer = (int)(message+diff);
+            if (byteMaxMinValueCounter > 0) {
+                --byteBuffer;
+            }
+            --byteMaxMinValueCounter;
+        }
+    }
+
+    private static void flushByteBuffer() {
+        writeByte();
+        cleanByteBuffer();
+    }
+
+    private  static void writeByte() {
+        writeByteMinMaxValue();
+        writeByteResidual();
+    }
+
+    private static void writeByteMinMaxValue() {
+        byte overflowValue = byteMaxMinValueCounter > 0 ? Byte.MAX_VALUE : Byte.MIN_VALUE;
+        for (int i = 0; i < abs(byteMaxMinValueCounter); i++) {
+            write(formatMessage(PRIMITIVE_PREFIX, overflowValue));
+        }
+    }
+
+    private static void writeByteResidual() {
+        // to avoid printing "MAX_VALUE\n0" or "MIN_VALUE\n0"
+        // but allow "0" (when "MAX_VALUE" or "MIN_VALUE" is not needed)
+        if (byteBuffer != 0 || byteMaxMinValueCounter == 0) {
+            write(formatMessage(PRIMITIVE_PREFIX, byteBuffer));
+        }
+    }
+
+    private static void cleanByteBuffer() {
+        byteBuffer = 0;
+        byteMaxMinValueCounter = 0;
+    }
+
+    //--------------------------------------------
     public static void log(Object message) {
         flushOtherClass(OBJECT);
         write(formatMessage(OBJECT_PREFIX, message));
         setLastLogClass(OBJECT);
-    }
-
-    public static void log(byte message) {
-        flushOtherClass(BYTE);
-        write(formatMessage(PRIMITIVE_PREFIX, message));
-        setLastLogClass(BYTE);
     }
 
     public static void log(char message) {
@@ -172,6 +239,8 @@ public class Logger {
 
     public static void flush() {
         switch (lastLogClass){
+            case BYTE:
+                flushByteBuffer();
             case INTEGER:
                 flushIntBuffer();
                 break;
