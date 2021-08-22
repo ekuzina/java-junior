@@ -66,14 +66,14 @@ public class LoggerTest implements SysoutCaptureAndAssertionAbility {
         Logger.log(Integer.MAX_VALUE);
 
         Logger.log((byte)5);
-        Logger.log('a');
+        Logger.log('l');
         Logger.log(6);
-        Logger.log('b');
+        Logger.log('y');
 
         Logger.log(Integer.MIN_VALUE+8);
         Logger.log(-8);
 
-        Logger.log('c');
+        Logger.log('z');
         Logger.flush();
         //endregion
 
@@ -88,11 +88,11 @@ public class LoggerTest implements SysoutCaptureAndAssertionAbility {
         assertSysoutContains("3");
 
         assertSysoutContains("5");
-        assertSysoutContains("a");
+        assertSysoutContains("l");
         assertSysoutContains("6");
-        assertSysoutContains("b");
+        assertSysoutContains("y");
         assertSysoutContains(Integer.toString(Integer.MIN_VALUE));
-        assertSysoutContains("c");
+        assertSysoutContains("z");
         //endregion
     }
 
